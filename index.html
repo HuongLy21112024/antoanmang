@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mê Cung An Toàn Mạng Nâng Cao - Tin Học 5</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    header h1 {
+      font-size: 1.8rem;
+      color: #38bdf8;
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+    }
+
+    header p {
+      font-size: 0.95rem;
+      color: #94a3b8;
+    }
+
+    .main-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      max-width: 1250px;
+      width: 100%;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    /* Khung Mê cung */
+    .maze-card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .status-dashboard {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 10px;
+    }
+
+    .stat-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      text-align: center;
+      flex: 1;
+    }
+
+    .stat-box span {
+      display: block;
+      font-size: 1.2rem;
+      color: #38bdf8;
+    }
+
+    .stat-box.steps span {
+      color: #4ade80;
+    }
+
+    /* Mê cung Grid 25x25 */
+    #maze {
+      display: grid;
+      grid-template-columns: repeat(25, 1fr);
+      grid-template-rows: repeat(25, 1fr);
+      gap: 1px;
+      width: 480px;
+      height: 480px;
+      background-color: #020617;
+      padding: 4px;
+      border-radius: 8px;
+      border: 2px solid #475569;
+    }
+
+    .cell {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: bold;
+      border-radius: 1px;
+      position: relative;
+    }
+
+    .cell.wall {
+      background-color: #1e293b;
+    }
+
+    .cell.path {
+      background-color: #ffffff;
+    }
+
+    .cell.start {
+      background-color: #86efac !important;
+      color: #166534;
+    }
+
+    .cell.finish {
+      background-color: #fca5a5 !important;
+      color: #991b1b;
+    }
+
+    /* Đồ họa nhân vật robot giống ảnh gốc */
+    .player-avatar {
+      width: 90%;
+      height: 90%;
+      background: #2563eb;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 6px #38bdf8;
+    }
+
+    .player-avatar svg {
+      width: 80%;
+      height: 80%;
+    }
+
+    /* Control Pad */
+    .controls-hint {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      text-align: center;
+    }
+
+    .d-pad {
+      display: grid;
+      grid-template-columns: repeat(3, 42px);
+      grid-template-rows: repeat(2, 42px);
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .d-btn {
+      background: #334155;
+      border: 1px solid #475569;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    .d-btn:active {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+
+    /* Trắc Nghiệm */
+    .quiz-card {
+      background: #1e293b;
+      border: 2px solid #334155;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      flex: 1 1 450px;
+      max-width: 600px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .quiz-card h2 {
+      font-size: 1.2rem;
+      color: #38bdf8;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 8px;
+    }
+
+    .question-text {
+      font-size: 1rem;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      background: #0f172a;
+      padding: 14px;
+      border-left: 4px solid #38bdf8;
+      border-radius: 6px;
+      color: #f1f5f9;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .option-btn {
+      background: #0f172a;
+      border: 1px solid #334155;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      text-align: left;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+
+    .option-btn:hover {
+      background: #1e293b;
+      border-color: #38bdf8;
+    }
+
+    .option-btn.correct {
+      background: #064e3b !important;
+      border-color: #22c55e !important;
+      color: #86efac;
+      font-weight: bold;
+    }
+
+    .option-btn.wrong {
+      background: #7f1d1d !important;
+      border-color: #ef4444 !important;
+      color: #fca5a5;
+    }
+
+    .explanation-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      display: none;
+    }
+
+    .explanation-box.show-correct {
+      display: block;
+      background: #022c22;
+      border: 1px solid #10b981;
+      color: #6ee7b7;
+    }
+
+    .explanation-box.show-wrong {
+      display: block;
+      background: #450a0a;
+      border: 1px solid #f43f5e;
+      color: #fecdd3;
+    }
+
+    .next-btn {
+      margin-top: 15px;
+      background: #0284c7;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      display: none;
+    }
+
+    .next-btn:hover {
+      background: #0369a1;
+    }
+
+    .win-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .win-box {
+      background: #1e293b;
+      border: 2px solid #22c55e;
+      padding: 30px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 420px;
+    }
+
+    .win-box h2 {
+      color: #4ade80;
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+    }
+
+    .win-box p {
+      color: #cbd5e1;
+      margin-bottom: 15px;
+      line-height: 1.5;
+    }
+
+    .win-box button {
+      background: #22c55e;
+      color: #022c22;
+      font-weight: bold;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Mê Cung An Toàn Không Gian Mạng (Nâng Cao)</h1>
+    <p>Trả lời đúng câu hỏi để tích lũy điểm & lượt đi, sau đó sử dụng các phím mũi tên để di chuyển robot!</p>
+  </header>
+
+  <div class="main-container">
+    <!-- Cột Mê Cung -->
+    <div class="maze-card">
+      <div class="status-dashboard">
+        <div class="stat-box">Điểm Số<span id="score">0</span></div>
+        <div class="stat-box steps">Lượt Di Chuyển Khả Dụng<span id="moves">0</span></div>
+      </div>
+
+      <div id="maze"></div>
+
+      <div class="controls-hint">Bấm các phím mũi tên <b>[←] [↑] [↓] [→]</b> hoặc nút bên dưới:</div>
+      <div class="d-pad">
+        <div></div>
+        <button class="d-btn" onclick="movePlayer(0, -1)">▲</button>
+        <div></div>
+        <button class="d-btn" onclick="movePlayer(-1, 0)">◄</button>
+        <button class="d-btn" onclick="movePlayer(0, 1)">▼</button>
+        <button class="d-btn" onclick="movePlayer(1, 0)">►</button>
+      </div>
+    </div>
+
+    <!-- Cột Thử Thách Trắc Nghiệm -->
+    <div class="quiz-card">
+      <h2>Thử Thách Kiến Thức Bảo Mật</h2>
+      <div class="question-text" id="question-text">Đang tải dữ liệu câu hỏi...</div>
+      <div class="options-grid" id="options-grid"></div>
+      
+      <div class="explanation-box" id="explanation-box"></div>
+      <button class="next-btn" id="next-btn" onclick="loadNextQuestion()">Câu hỏi tiếp theo ➔</button>
+    </div>
+  </div>
+
+  <div class="win-overlay" id="win-overlay">
+    <div class="win-box">
+      <h2> THẮNG CUỘC!</h2>
+      <p>Em đã xuất sắc điều khiển nhân vật thoát khỏi mê cung phức tạp và làm chủ kiến thức an toàn mạng!</p>
+      <button onclick="location.reload()">Chơi Lại Bàn Mới</button>
+    </div>
+  </div>
+
+  <script>
+    const baseQuestions = [
+      {
+        question: "Thông tin nào sau đây thuộc danh tính cá nhân tuyệt đối KHÔNG nên chia sẻ công khai lên mạng?",
+        options: [
+          "A. Sở thích cá nhân và môn học em yêu thích nhất.",
+          "B. Họ tên đầy đủ, ngày sinh và số Căn cước công dân.",
+          "C. Cảm nhận của em về một cuốn sách vừa đọc xong.",
+          "D. Tên nhân vật hoạt hình mà em cảm thấy ấn tượng."
+        ],
+        correct: 1,
+        explanation: "Họ tên đầy đủ, ngày sinh và số CCCD là thông tin định danh cá nhân nhạy cảm, dễ bị kẻ xấu lợi dụng để mạo danh."
+      },
+      {
+        question: "Mật khẩu nào dưới đây đạt tiêu chuẩn an toàn cao để bảo vệ tài khoản trực tuyến của em?",
+        options: [
+          "A. 12345678 (Dãy số tự nhiên liên tiếp rất dễ nhớ).",
+          "B. tenchuchim (Tên con vật cưng viết liền không dấu).",
+          "C. Hg@9821#Kq (Hỗ trợ cả chữ hoa, chữ thường, số, ký tự).",
+          "D. nguyenvana (Họ tên đầy đủ của người sử dụng)."
+        ],
+        correct: 2,
+        explanation: "Mật khẩu mạnh cần kết hợp chữ hoa, chữ thường, chữ số và ký tự đặc biệt để ngăn chặn các phần mềm dò mật khẩu."
+      },
+      {
+        question: "Khi nhận được tin nhắn từ người lạ gửi liên kết lạ kèm lời mời nhận thưởng, em nên xử lý thế nào?",
+        options: [
+          "A. Không nhấn vào liên kết và báo ngay cho người lớn.",
+          "B. Nhấn ngay vào liên kết để kiểm tra giải thưởng là gì.",
+          "C. Chuyển tiếp liên kết đó cho tất cả bạn bè cùng nhận.",
+          "D. Nhập thông tin cá nhân để hoàn tất đăng ký phần thưởng."
+        ],
+        correct: 0,
+        explanation: "Liên kết lạ thường dẫn tới trang web giả mạo chứa mã độc. Cần tuyệt đối tránh truy cập và báo cho phụ huynh/thầy cô."
+      },
+      {
+        question: "Hành động nào dưới đây thể hiện văn hóa ứng xử thông minh và lịch sự trên không gian mạng?",
+        options: [
+          "A. Dùng lời lẽ thô tục khi tranh luận trên diễn đàn.",
+          "B. Tôn trọng người khác, không lan truyền tin giả chưa xác minh.",
+          "C. Đăng tải ảnh chụp chưa xin phép của người khác lên mạng.",
+          "D. Tự ý lấy thông tin bài viết của bạn khác làm bài của mình."
+        ],
+        correct: 1,
+        explanation: "Văn hóa mạng thể hiện qua việc tôn trọng quyền riêng tư, không chia sẻ tin giả và giao tiếp bằng ngôn từ lịch sự."
+      },
+      {
+        question: "Khi bị người lạ đăng tải thông tin bôi nhọ hoặc xúc phạm trên mạng, em nên thực hiện bước nào trước tiên?",
+        options: [
+          "A. Đăng bài viết khác để chửi bọ xúc phạm lại người đó.",
+          "B. Giữ yên lặng, tự chịu đựng và không nói với ai cả.",
+          "C. Rủ bạn bè vào bình luận tấn công tài khoản người đó.",
+          "D. Chụp ảnh màn hình làm bằng chứng và báo với người lớn."
+        ],
+        correct: 3,
+        explanation: "Lưu lại bằng chứng và nhờ sự hỗ trợ từ người lớn là giải pháp đúng đắn và an toàn nhất khi bị bắt nạt trên mạng."
+      },
+      {
+        question: "Tại sao em tuyệt đối không nên sử dụng mạng Wi-Fi công cộng không có mật khẩu để giao dịch?",
+        options: [
+          "A. Vì Wi-Fi công cộng luôn có tốc độ truyền tải rất chậm.",
+          "B. Vì Wi-Fi công cộng làm thiết bị tốn nhiều pin hơn.",
+          "C. Vì kẻ gian có thể dễ dàng đánh chặn dữ liệu truyền đi.",
+          "D. Vì Wi-Fi công cộng sẽ làm tự động xóa ứng dụng máy."
+        ],
+        correct: 2,
+        explanation: "Kết nối Wi-Fi không bảo mật cho phép kẻ xấu dễ dàng đánh chặn thông tin cá nhân và tài khoản đăng nhập của người dùng."
+      },
+      {
+        question: "Dấu hiệu nào giúp em nhận biết một trang web đăng nhập là an toàn và đáng tin cậy?",
+        options: [
+          "A. Địa chỉ web bắt đầu bằng https:// và có biểu tượng khóa.",
+          "B. Trang web chứa rất nhiều hình ảnh quảng cáo bắt mắt.",
+          "C. Trang web yêu cầu cung cấp mật khẩu ngay khi vừa truy cập.",
+          "D. Trang web tự động tải về các tệp tin không rõ nguồn gốc."
+        ],
+        correct: 0,
+        explanation: "Giao thức https:// cùng biểu tượng ổ khóa bảo mật xác nhận rằng dữ liệu trao đổi đã được mã hóa an toàn."
+      },
+      {
+        question: "Dấu chân kỹ thuật số (Digital Footprint) trên không gian mạng được hiểu là gì?",
+        options: [
+          "A. Vết bẩn bám trên màn hình máy tính khi em sử dụng.",
+          "B. Lịch sử các hoạt động và dữ liệu em để lại trên mạng.",
+          "C. Tốc độ di chuyển của chuột máy tính trên trang web.",
+          "D. Số lượng ứng dụng được cài đặt trên điện thoại cá nhân."
+        ],
+        correct: 1,
+        explanation: "Dấu chân kỹ thuật số lưu lại mọi vết tích trực tuyến của em. Những thông tin này tồn tại lâu dài và khó xóa hoàn toàn."
+      },
+      {
+        question: "Để bảo vệ thiết bị cá nhân khỏi vi-rút và phần mềm độc hại, em nên làm điều nào sau đây?",
+        options: [
+          "A. Tắt hoàn toàn phần mềm diệt vi-rút có sẵn trên hệ điều hành.",
+          "B. Thường xuyên cập nhật hệ điều hành và chỉ tải ứng dụng chính thống.",
+          "C. Mở tất cả các tệp đính kèm trong thư điện tử gửi từ người lạ.",
+          "D. Cắm các thiết bị USB lạ nhặt được vào máy tính kiểm tra."
+        ],
+        correct: 1,
+        explanation: "Cập nhật hệ thống định kỳ và cài ứng dụng từ cửa hàng chính thức giúp loại bỏ các lỗ hổng an ninh mạng."
+      },
+      {
+        question: "Khi tạo tài khoản trò chơi trực tuyến, em nên chọn tên nhân vật (Nickname) như thế nào?",
+        options: [
+          "A. Sử dụng đúng họ tên thật kèm theo năm sinh của mình.",
+          "B. Đặt tên chứa số điện thoại cá nhân để bạn dễ gọi.",
+          "C. Đặt tên biệt danh không chứa thông tin cá nhân riêng tư.",
+          "D. Dùng thông tin địa chỉ nhà riêng làm tên nhân vật."
+        ],
+        correct: 2,
+        explanation: "Sử dụng biệt danh trung tính giúp bảo vệ bí mật danh tính thật của em khỏi kẻ xấu trên mạng xã hội/game."
+      }
+    ];
+
+    // Cấu trúc Ma Trận 25x25 (1: Tường, 0: Đường đi)
+    // Đã ĐƯỢC MỞ ĐƯỜNG ĐI (0) ở các vị trí liền kề S [24,0] là [24,1] và [23,0]
+    const mazeGrid = [
+      [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0], // Row 0 (E ở [0,24])
+      [1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0],
+      [1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,1,1],
+      [1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1],
+      [1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1],
+      [1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1],
+      [1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,1],
+      [1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,1],
+      [1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,0,1,1,1,0,1],
+      [1,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,1],
+      [1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1],
+      [1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1],
+      [1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1],
+      [1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+      [1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1],
+      [1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,1],
+      [1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1],
+      [1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,1],
+      [1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1],
+      [1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1],
+      [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1],
+      [1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,1],
+      [1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1],
+      [0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,1], // [23,0] được mở thành 0
+      [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]  // S ở [24,0], [24,1] mở thành 0
+    ];
+
+    let playerPos = { r: 24, c: 0 };
+    const endPos = { r: 0, c: 24 };
+    
+    let score = 0;
+    let availableMoves = 0; 
+    let questionQueue = [...baseQuestions];
+    let currentQuestion = null;
+    let isAnswered = false;
+
+    function renderMaze() {
+      const mazeEl = document.getElementById('maze');
+      mazeEl.innerHTML = '';
+
+      for (let r = 0; r < 25; r++) {
+        for (let c = 0; c < 25; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.id = `cell-${r}-${c}`;
+
+          if (r === 24 && c === 0) {
+            cell.classList.add('start');
+            cell.innerText = 'S';
+          } else if (r === 0 && c === 24) {
+            cell.classList.add('finish');
+            cell.innerText = 'E';
+          } else if (mazeGrid[r][c] === 1) {
+            cell.classList.add('wall');
+          } else {
+            cell.classList.add('path');
+          }
+
+          mazeEl.appendChild(cell);
+        }
+      }
+      updatePlayerRender();
+    }
+
+    // Đồ họa Robot giống với bản gốc
+    function updatePlayerRender() {
+      document.querySelectorAll('.player-avatar').forEach(p => p.remove());
+
+      const targetCell = document.getElementById(`cell-${playerPos.r}-${playerPos.c}`);
+      if (targetCell) {
+        const playerEl = document.createElement('div');
+        playerEl.classList.add('player-avatar');
+        playerEl.innerHTML = `
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" rx="20" fill="#3B82F6"/>
+            <!-- Antennas -->
+            <rect x="20" y="10" width="8" height="20" rx="4" fill="#EF4444"/>
+            <rect x="72" y="10" width="8" height="20" rx="4" fill="#EF4444"/>
+            <!-- Eyes -->
+            <rect x="25" y="38" width="20" height="18" rx="5" fill="#38BDF8"/>
+            <rect x="55" y="38" width="20" height="18" rx="5" fill="#38BDF8"/>
+            <circle cx="35" cy="47" r="4" fill="#0F172A"/>
+            <circle cx="65" cy="47" r="4" fill="#0F172A"/>
+            <!-- Mouth -->
+            <rect x="35" y="70" width="30" height="6" rx="3" fill="#0F172A"/>
+          </svg>
+        `;
+        targetCell.appendChild(playerEl);
+      }
+    }
+
+    function movePlayer(dc, dr) {
+      if (availableMoves <= 0) {
+        alert("Lượt di chuyển của em đang bằng 0! Hãy trả lời đúng các câu hỏi trắc nghiệm để tích lũy lượt đi.");
+        return;
+      }
+
+      const newR = playerPos.r + dr;
+      const newC = playerPos.c + dc;
+
+      if (newR >= 0 && newR < 25 && newC >= 0 && newC < 25) {
+        if (mazeGrid[newR][newC] !== 1) { // Lối đi hợp lệ (không phải tường)
+          playerPos.r = newR;
+          playerPos.c = newC;
+          availableMoves--;
+
+          document.getElementById('moves').innerText = availableMoves;
+          updatePlayerRender();
+
+          if (playerPos.r === endPos.r && playerPos.c === endPos.c) {
+            setTimeout(() => {
+              document.getElementById('win-overlay').style.display = 'flex';
+            }, 200);
+          }
+        }
+      }
+    }
+
+    // Sự kiện bấm phím di chuyển
+    window.addEventListener('keydown', (e) => {
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        e.preventDefault();
+      }
+
+      switch(e.key) {
+        case 'ArrowUp':
+          movePlayer(0, -1);
+          break;
+        case 'ArrowDown':
+          movePlayer(0, 1);
+          break;
+        case 'ArrowLeft':
+          movePlayer(-1, 0);
+          break;
+        case 'ArrowRight':
+          movePlayer(1, 0);
+          break;
+      }
+    });
+
+    function loadNextQuestion() {
+      isAnswered = false;
+      document.getElementById('explanation-box').className = 'explanation-box';
+      document.getElementById('next-btn').style.display = 'none';
+
+      if (questionQueue.length === 0) {
+        questionQueue = [...baseQuestions];
+      }
+
+      currentQuestion = questionQueue.shift();
+      document.getElementById('question-text').innerText = currentQuestion.question;
+
+      const optionsGrid = document.getElementById('options-grid');
+      optionsGrid.innerHTML = '';
+
+      currentQuestion.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.innerText = optText;
+        btn.onclick = () => handleAnswer(idx);
+        optionsGrid.appendChild(btn);
+      });
+    }
+
+    function handleAnswer(selectedIndex) {
+      if (isAnswered) return;
+      isAnswered = true;
+
+      const btns = document.querySelectorAll('.option-btn');
+      const expBox = document.getElementById('explanation-box');
+      const nextBtn = document.getElementById('next-btn');
+
+      if (selectedIndex === currentQuestion.correct) {
+        btns[selectedIndex].classList.add('correct');
+        score += 5;
+        availableMoves += 5; // Cộng đúng 5 lượt đi tương ứng 5 điểm
+
+        document.getElementById('score').innerText = score;
+        document.getElementById('moves').innerText = availableMoves;
+
+        expBox.innerHTML = `<strong> CHÍNH XÁC! (+5 Điểm / +5 Lượt đi)</strong><br>${currentQuestion.explanation}`;
+        expBox.classList.add('show-correct');
+      } else {
+        btns[selectedIndex].classList.add('wrong');
+        btns[currentQuestion.correct].classList.add('correct');
+
+        expBox.innerHTML = `<strong> CHƯA CHÍNH XÁC!</strong><br>${currentQuestion.explanation}<br><em>(Câu hỏi này sẽ xuất hiện lại ở các lượt sau).</em>`;
+        expBox.classList.add('show-wrong');
+
+        questionQueue.push(currentQuestion);
+      }
+
+      nextBtn.style.display = 'block';
+    }
+
+    window.onload = () => {
+      renderMaze();
+      loadNextQuestion();
+    };
+  </script>
+</body>
+</html>
